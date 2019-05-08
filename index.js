@@ -1,47 +1,50 @@
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
+const express = require("express");
+const http = require("http");
+const socketIo = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
-const UsersService = require('./UsersService');
-
+const UsersService = require("./UsersService");
 const usersService = new UsersService();
 
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(`${__dirname}/public`));
 
-app.get('/', function(req, res) {
-   app.sendFile(__dirname + '/index.html');
+app.get("/", (req, res) => {
+  res.sendFile(`${__dirname}/index.html`);
 });
 
-io.on('connection', function(socket) {
-   socket.on('join', function(name) {
-      userService.addUser({
-         id: socket.id,
-         name
+io.on("connection", socket => {
+  socket.on("join", name => {
+    usersService.addUser({
+      id: socket.id,
+      name
+    });
+    io.emit("update", {
+      users: usersService.getAllUsers()
+    });
+  });
+
+  io.on("connection", socket => {
+    socket.on("disconnect", () => {
+      usersService.removeUser(socket.id);
+      socket.broadcast.emit("update", {
+        users: usersService.getAllUsers()
       });
-      io.emit('update', {
-         users: userService.getAllUsers()
+    });
+  });
+
+  io.on("connection", socket => {
+    socket.on("message", message => {
+      const { name } = usersService.getUserById(socket.id);
+      socket.broadcast.emit("message", {
+        text: message.text,
+        from: name
       });
-   });
-   socket.on('disconnect', function() {
-      userService.removeUser(socket.id);
-      socket.broadcast.emit('update', {
-         user: userService.getAllUsers()
-      });
-   });
-   socket.on('message', function(message) {
-      const {name} = userService.getUserById(socket.id);
-      socket.broadcast.emit('message', {
-         text: message.text,
-         from: name,
-         color: message.color
-      });
-      console.log(message.color);
-   });
+    });
+  });
 });
 
-server.listen(3000, function() {
-   console.log('3000');
+server.listen(3000, () => {
+  console.log("listening on *:3000");
 });

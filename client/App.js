@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { hot } from "react-hot-loader";
 import io from "socket.io-client";
-import styles from "./App.css";
+import styles from "./Css/App.css";
 import MessageForm from "./MessageForm";
 import MessageList from "./MessageList";
 import UsersList from "./UsersList";
@@ -48,7 +48,7 @@ class App extends Component {
     return (
       <div className={styles.App}>
         <div className={styles.AppHeader}>
-          <div className={styles.AppTitle}>ChatApp</div>
+          <div className={styles.AppTitle}>Chat App</div>
           <div className={styles.AppRoom}>App room</div>
         </div>
         <div className={styles.AppBody}>
